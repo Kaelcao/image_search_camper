@@ -11,6 +11,13 @@ var app = express();
 
 app.set('port', process.env.PORT || 5000);
 
+app.set('views', __dirname+"/views");
+app.set('view engine','jade');
+
+app.get('/',(req,res) => {
+   res.render('index',{url:req.protocol + '://' + req.get('host')});
+});
+
 app.get('/api/imagesearch/:search_str', (req,res) => {
     var search_str = req.params.search_str;
     var offset = 1;
@@ -44,7 +51,7 @@ app.get('/api/latest/imagesearch/',(req,res) => {
     mongoClient.connect(MONGOLAB_URI,(err,db) => {
         if (err) throw(err);
         var collection = db.collection('searchs');
-        collection.find({},{_id:0}).toArray(function(err, docs) {
+        collection.find({},{_id:0}).sort({when:-1}).toArray(function(err, docs) {
           res.json(docs);
           db.close();
         });
